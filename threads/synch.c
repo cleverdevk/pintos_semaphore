@@ -138,7 +138,9 @@ sema_self_test (void)
   for (i = 0; i < 10; i++) 
     {
       sema_up (&sema[0]);
+      printf("sema0 up\n");
       sema_down (&sema[1]);
+      printf("sema1 down\n");
     }
   printf ("done.\n");
 }
@@ -153,7 +155,9 @@ sema_test_helper (void *sema_)
   for (i = 0; i < 10; i++) 
     {
       sema_down (&sema[0]);
+      printf("-sema0 down\n");
       sema_up (&sema[1]);
+      printf("-sema1 up\n");
     }
 }
 
