@@ -9,7 +9,7 @@
 #include "devices/timer.h"
 
 struct data {
-	int Fe, Co, FeNeed, CoNeed;
+	int Fe, Co, FeNeed, CoNeed, FeOre, CoOre, inputFe, inputCo;
 	int *blt0, *blt1, *blt2, *blt3;
 	struct semaphore *b0,*b1,*b2_left, *b2_right,*b3_left, *b3_right,*fn0,*fn1,*fn2,*fn0_complete,*fn1_complete;
 	bool fn0_task, fn1_task, fn2_task, fn0_done, fn1_done, fn2_done;
@@ -63,12 +63,13 @@ void arm2(struct data* d)
         while(1)
         {
 		sema_down(d->b2_left);
-		sema_down(d->fn0_complete);
-		//sema_down(d->b2_left);
-		d->blt2[0] = 1;
-		printf("Arm2 works!\n");
-		sema_up(d->fn0_complete);
-	        sema_up(d->b2_left);
+		if(d->blt2[0]==0 && d->fn0_done == true)
+		{	
+			d->blt2[0] = 1;
+			printf("Arm2 works!\n");
+			d->fn0_done = false;
+			sema_up(d->b2_left);
+		}
 		timer_msleep(1000);
         }
 
@@ -78,14 +79,22 @@ void arm3(struct data* d)
 {
         timer_msleep(1000);
 
-	printf("arm3 thread start!\n");
+        printf("arm3 thread start!\n");
         while(1)
         {
-                printf("Arm3 works!\n");
-		timer_msleep(1000);
+                sema_down(d->b3_left);
+                if(d->blt3[0]==0 && d->fn1_done == true)
+                {
+                        d->blt3[0] = 1;
+                        printf("Arm3 works!\n");
+                        d->fn1_done = false;
+                        sema_up(d->b3_left);
+                }
+                timer_msleep(1000);
         }
 
 }
+
 
 void arm4(struct data* d)
 {
@@ -118,43 +127,46 @@ void furnace0(struct data* d)
 	//furnace0
 	while(1)
 	{
-//		if((d->fn0_task))
-//		{
-			sema_down(d->fn0_complete);			
+		if(d->fn0_done==false)
+		{
+			//sema_down(d->fn0_complete);			
 			sema_down(d->fn0);
 			printf("furnace0 works!\n");
 			timer_msleep(1000);
-			(d->fn0_done) = true;
+			(d->FeOre)++;
+			d->fn0_done = true;
 			printf("furnace0 work complete!\n");
 			(d->fn0_task) = false;
-			sema_up(d->fn0_complete);
+			//sema_up(d->fn0_complete);
 			sema_up(d->fn0);
 			timer_msleep(1000);
 
-//		}
+		}
 	}
 }
 
 void furnace1(struct data* d)
 {
         timer_msleep(1000);
-
         printf("furnace1 thread start!\n");
         //furnace0
         while(1)
         {
-//              if((d->fn0_task))
-//              {
+                if(d->fn1_done==false)
+                {
+                        //sema_down(d->fn1_complete);                   
                         sema_down(d->fn1);
                         printf("furnace1 works!\n");
                         timer_msleep(1000);
-                        (d->fn1_done) = true;
+			(d->CoOre)++;
+                        d->fn1_done = true;
                         printf("furnace1 work complete!\n");
                         (d->fn1_task) = false;
+                        //sema_up(d->fn1_complete);
                         sema_up(d->fn1);
                         timer_msleep(1000);
 
-//              }
+                }
         }
 }
 
@@ -223,7 +235,7 @@ void belt1(struct data* d)
                 sema_down(d->b1);
                 while(1)
                 {
-                        printf("BELT0 : [%d] [%d] [%d]\n",d->blt1[0],d->blt1[1],d->blt1[2]);
+                        printf("BELT1 : [%d] [%d] [%d]\n",d->blt1[0],d->blt1[1],d->blt1[2]);
                         if(d->blt1[2] == 0)
                         {
                                 d->blt1[2] = d->blt1[1];
@@ -263,15 +275,41 @@ void belt2(struct data* d)
 		{
 			d->blt2[2] = d->blt2[1];
 			d->blt2[1] = d->blt2[0];
-			d->blt2[0] == 0;
+			d->blt2[0] = 0;
 		}
 		if(d->blt2[0]==0) sema_up(d->b2_left);
 		printf("BELT2 : [%d] [%d] [%d]\n",d->blt2[0],d->blt2[1],d->blt2[2]);
+		sema_up(d->b2_left);
 		timer_msleep(1000);
 	}
 
 
 }
+
+void belt3(struct data* d)
+{
+        timer_msleep(1000);
+
+        printf("blet3 thread start!\n");
+        while(1)
+        {
+                sema_down(d->b3_left);
+                //sema_down(d->b3_right);
+                if(d->blt3[2] == 0)
+                {
+                        d->blt3[2] = d->blt3[1];
+                        d->blt3[1] = d->blt3[0];
+                        d->blt3[0] = 0;
+                }
+                if(d->blt3[0]==0) sema_up(d->b3_left);
+                printf("BELT3 : [%d] [%d] [%d]\n",d->blt3[0],d->blt3[1],d->blt3[2]);
+                sema_up(d->b3_left);
+                timer_msleep(1000);
+        }
+
+
+}
+
 
 void print(struct data* d)
 {
@@ -330,7 +368,7 @@ void print(struct data* d)
 void run_factorii(char **argv)
 {
 
-	int Fe, Co, FeNeed, CoNeed;
+	int Fe, Co, FeNeed, CoNeed, FeOre, CoOre;
 	struct data* d;
 	d = (struct data*) malloc(sizeof(struct data));
 	int *blt0, *blt1, *blt2, *blt3;
@@ -343,7 +381,10 @@ void run_factorii(char **argv)
 	Co = atoi(argv[2]);
 	FeNeed = atoi(argv[3]);
 	CoNeed = atoi(argv[4]);
-	
+	FeOre = 0;
+	CoOre = 0;
+
+
 	blt0 = (int *)malloc(12);
 	blt1 = (int *)malloc(12);
 	blt2 = (int *)malloc(12);
@@ -398,7 +439,11 @@ void run_factorii(char **argv)
 	d->Co = Co;
 	d->FeNeed = FeNeed;
 	d->CoNeed = CoNeed;
-	
+	d->FeOre = FeOre;
+	d->CoOre = CoOre;
+	d->inputFe = Fe;
+	d->inputCo = Co;
+
 	d->b0 = b0;
 	d->b1 = b1;
 	d->b2_left = b2_left;
@@ -423,10 +468,11 @@ void run_factorii(char **argv)
 	thread_create("belt0",0,&belt0,d);
 	thread_create("belt1",0,&belt1,d);
 	thread_create("belt2",0,&belt2,d);
+	thread_create("belt3",0,&belt3,d);
 	thread_create("arm0",0,&arm0,d);
 	thread_create("arm1",0,&arm1,d);
 	thread_create("arm2",0,&arm2,d);
-	//thread_create("arm3",0,&arm3,d);
+	thread_create("arm3",0,&arm3,d);
 	//thread_create("arm4",0,&arm4,d);
 	//thread_create("arm5",0,&arm5,d);
 	thread_create("furnace0",0,&furnace0,d);
