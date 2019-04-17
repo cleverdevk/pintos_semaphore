@@ -32,7 +32,8 @@ void arm0(struct data* d)
   while(1)
   {
 	start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+  thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
     sema_down(d->b0);
     sema_down(d->fn0_left);
     printf("Arm0 works!\n");
@@ -68,7 +69,8 @@ void arm1(struct data* d)
   while(1)
   {
 	start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+  thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
     sema_down(d->b1);
     sema_down(d->fn1_left);
     printf("Arm1 works!\n");
@@ -104,7 +106,8 @@ void arm2(struct data* d)
   while(1)
   {
 	start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+  thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
     sema_down(d->fn0);
     //sema_down(d->b2_left);
 	if(d->blt2[0] == 0){
@@ -141,7 +144,8 @@ void arm3(struct data* d)
   while(1)
   {
     start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+    thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
     sema_down(d->fn1);
     //sema_down(d->b3_left);
 	if(d->blt3[0] == 0){
@@ -179,9 +183,11 @@ void arm4(struct data* d)
   while(1)
   {
     start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+    thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
     sema_down(d->b2_right);
     sema_down(d->fn2_Fe);
+    if(d->CoFe == d->Target) break;
 	printf("Arm4 works!\n");
     d->blt2[2] = 0;
 	d->FeOre--;
@@ -210,9 +216,11 @@ void arm5(struct data* d)
   while(1)
   {
     start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+    thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
     sema_down(d->b3_right);
     sema_down(d->fn2_Co);
+    if(d->CoFe == d->Target) break;
     printf("Arm5 works!\n");
     d->blt3[2] = 0;
 	d->CoOre--;
@@ -241,7 +249,8 @@ void furnace0(struct data* d)
   while(1)
   {
     start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+    thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
     sema_down(d->fn0_left);
     sema_down(d->fn0);
     printf("furnace0 works!\n");
@@ -280,7 +289,8 @@ void furnace1(struct data* d)
   while(1)
   {
     start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+    thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
     sema_down(d->fn1_left);
     sema_down(d->fn1);
     printf("furnace1 works!\n");
@@ -318,7 +328,8 @@ void furnace2(struct data* d)
   while(1)
   {
     start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+    thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
       sema_down(d->fn2_Fe);
       sema_down(d->fn2_Co);
 
@@ -336,6 +347,7 @@ void furnace2(struct data* d)
 	  }
         sema_up(d->fn2_Fe);
         sema_up(d->fn2_Co);
+    if(d->CoFe == d->Target) break;
         if(m1 == 0) sema_down(d->delay1);
         if(m2 == 0) sema_down(d->delay0);
       thread_sleep(start+ticks);
@@ -354,12 +366,14 @@ void belt0(struct data* d)
   while(1)
   {
     start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+    thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
     //belt0
     sema_down(d->b0);
     while(1)
     {
       start2 = timer_ticks();
+      thread_sleep(start2+ticks/2);
       //printf("BELT0 : [%d] [%d] [%d]\n",d->blt0[0],d->blt0[1],d->blt0[2]);
       if(d->blt0[2] == 0)
       {
@@ -385,7 +399,7 @@ void belt0(struct data* d)
 			printf("**belt0 DEAD.\n");
 			break;
 		}
-    //if(d->CoFe == d->Target) thread_exit();
+    if(d->CoFe == d->Target) break;
         thread_sleep(start2+ticks);
       }
     }
@@ -413,12 +427,14 @@ void belt1(struct data* d)
   while(1)
   {
     start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+    thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
     //belt0
     sema_down(d->b1);
     while(1)
     {
       start2 = timer_ticks();
+      thread_sleep(start2+ticks/2);
       //printf("BELT0 : [%d] [%d] [%d]\n",d->blt0[0],d->blt0[1],d->blt0[2]);
       if(d->blt1[2] == 0)
       {
@@ -444,7 +460,7 @@ void belt1(struct data* d)
 			printf("**belt1 DEAD.\n");
 			break;
 		}
-    //if(d->CoFe == d->Target) thread_exit();
+    if(d->CoFe == d->Target) break;
         thread_sleep(start2+ticks);
       }
     }
@@ -472,9 +488,11 @@ void belt2(struct data* d)
   while(1)
   {
     start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+    thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
     //sema_down(d->b2_left);
     sema_down(d->b2_right);
+    if(d->CoFe == d->Target) break;
 	if(d->blt2[2] == 0)
     {
       d->blt2[2] = d->blt2[1];
@@ -510,9 +528,11 @@ void belt3(struct data* d)
   while(1)
   {
     start = timer_ticks();
-    //if(d->CoFe == d->Target) thread_exit();
+    thread_sleep(start+ticks/2);
+    if(d->CoFe == d->Target) break;
     //sema_down(d->b3_left);
     sema_down(d->b3_right);
+    if(d->CoFe == d->Target) break;
 	if(d->blt3[2] == 0)
     {
       d->blt3[2] = d->blt3[1];
@@ -543,8 +563,9 @@ void print(struct data* d)
   int i=0;
   while(1)
   {
+
     start = timer_ticks();
-    if(d->CoFe == d->Target) thread_exit();
+    if(d->CoFe == d->Target) break;
     printf("X X X X X X X X X X\n");
     for(int i=0; i<3; i++)
     {
@@ -552,10 +573,13 @@ void print(struct data* d)
       else printf(" ");
       printf(" ");
     }
-    printf("@ - @ ");
+    printf("@ ");
+	if(d->fn0_task) printf("o");
+	else printf("-");
+	printf(" @ ");
     for(int i=0; i<3; i++)
     {
-      if(d->blt2[i] == 1) printf("o");
+      if(d->blt2[i] == 1) printf("i");
       else printf(" ");
       printf(" ");
     }
@@ -567,10 +591,13 @@ void print(struct data* d)
       else printf(" ");
       printf(" ");
     }
-    printf("@ - @ ");
+    printf("@ ");
+	if(d->fn1_task) printf("o");
+	else printf("-");
+	printf(" @ ");
     for(int i=0; i<3; i++)
     {
-      if(d->blt3[i] == 1) printf("o");
+      if(d->blt3[i] == 1) printf("i");
       else printf(" ");
       printf(" ");
     }
@@ -580,10 +607,12 @@ void print(struct data* d)
     printf("###################\n");
     printf("## T = %d   ##\n",i++);
     printf("###################\n");
-    printf("FeOre=%d, CoOre=%d, FeIng=%d, CoIng=%d, CoFe=%d\n",d->Fe,d->Co,0,0,0);
+    printf("FeOre=%d, CoOre=%d, FeIng=%d, CoIng=%d, CoFe=%d\n",d->Fe,d->Co,d->FeOre,d->CoOre,d->CoFe);
     printf("\n");
     thread_sleep(start+ticks);
   }
+  printf("@@@@@@@@@ Result @@@@@@@@@@@@\n");
+  printf("FeOre=%d, CoOre=%d, FeIng=%d, CoIng=%d, CoFe=%d\n",d->Fe,d->Co,d->FeOre,d->CoOre,d->CoFe);
 }
 
 
@@ -757,7 +786,9 @@ void run_factorii(char **argv)
   thread_create("furnace0",0,&furnace0,d);
   thread_create("furnace1",0,&furnace1,d);
   thread_create("furnace2",0,&furnace2,d);
-  //thread_create("print",0,&print,d);
+  thread_create("print",0,&print,d);
+
+
 
 
 }
